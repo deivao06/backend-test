@@ -5,18 +5,23 @@ Esse documento visa coletar feedbacks sobre o teste de desenvolvimento. Desde o 
 
 1 - Fale sobre suas primeiras impressões do Teste:
 > Resposta
+> É um teste que condiz com a vaga. Não parece dificil mas parece trabalhoso.
 
 2 - Tempo estimado para o teste:
 > Resposta
+> Aproximadamente 16 horas
 
 3 - Qual parte você no momento considera mais difícil?
 > Resposta
+> Testes unitários
 
 4 - Qual parte você no momento considera que levará mais tempo?
 > Resposta
+> Testes unitários
 
 5 - Por onde você pretende começar?
 > Resposta
+> Começarei pelo CRUD dos Redirects
 
 
 ## Após o Teste
