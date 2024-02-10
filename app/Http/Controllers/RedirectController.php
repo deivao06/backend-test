@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Repositories\RedirectRepository;
 use App\Http\Requests\RedirectStoreRequest;
 use App\Http\Requests\RedirectUpdateRequest;
 use App\Http\Resources\RedirectResource;
@@ -15,6 +16,13 @@ use Illuminate\Support\Facades\DB;
 
 class RedirectController extends Controller
 {
+    private $redirectRepository;
+
+    public function __construct()
+    {
+        $this->redirectRepository = new RedirectRepository;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -48,13 +56,15 @@ class RedirectController extends Controller
 
         if (strpos($url, $app_url) !== false) {
             return response()->json(['errors' => 'The field url can not be equal application url'], 400);
+        }  
+
+        $redirect = $this->redirectRepository->store($url);
+
+        if ($redirect) {
+            return response()->json(['message' => "Redirect {$redirect->code} created successfuly"], 200);
         }
 
-        $redirect = Redirect::create([ 'url' => $url ]);
-        $redirect->code = Hashids::connection('main')->encode($redirect->id);
-        $redirect->save();
-
-        return new RedirectResource($redirect);
+        return response()->json(['errors' => 'Failed to create redirect', 400]);
     }
 
     /**
@@ -67,7 +77,7 @@ class RedirectController extends Controller
     {
         $redirect = Redirect::where('code', $code)->first();
 
-        if(!$redirect) {
+        if (!$redirect) {
             return response()->json([ 'errors' => 'Redirect does not exists' ], 400);
         }
 
@@ -94,17 +104,9 @@ class RedirectController extends Controller
      */
     public function update(RedirectUpdateRequest $request, $code)
     {
-        $url = $request->get('url');
-        $status = $request->get('status');
-
-        $redirect = Redirect::where('code', $code)->first();
-
-        if($redirect) {
-            $redirect->url = $url ?? $redirect->url;
-            $redirect->status = $status ?? $redirect->status;
-
-            $redirect->save();
-
+        $redirect = $this->redirectRepository->update($request, $code);
+        
+        if ($redirect) {
             return new RedirectResource($redirect);
         }
 
@@ -119,21 +121,24 @@ class RedirectController extends Controller
      */
     public function destroy($code)
     {
-        $redirect = Redirect::where('code', $code)->first();
-        $redirect->delete();
+        $destroy = $this->redirectRepository->destroy($code);
+        
+        if ($destroy) {
+            return response()->json([ 'message' => "Redirect deleted successfully" ], 200);
+        }
 
-        return response()->json([ 'message' => "Redirect $code deleted successfully" ], 200);
+        return response()->json([ 'errors' => "Failed to deleted redirect" ], 400);
     }
 
     public function redirect(Request $request, $code)
     {
         $redirect = Redirect::where('code', $code)->first();
 
-        if(!$redirect) {
+        if (!$redirect) {
             return response()->json([ 'errors' => 'Redirect does not exists' ], 400);
         }
 
-        if(!$redirect->status) {
+        if (!$redirect->status) {
             return response()->json([ 'errors' => 'Redirect is not active' ], 400);
         }
 
@@ -163,7 +168,7 @@ class RedirectController extends Controller
     {
         $redirect = Redirect::where('code', $code)->first();
 
-        if(!$redirect) {
+        if (!$redirect) {
             return response()->json([ 'errors' => 'Redirect does not exists' ], 400);
         }
 
