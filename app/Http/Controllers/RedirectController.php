@@ -56,7 +56,18 @@ class RedirectController extends Controller
 
         if (strpos($url, $app_url) !== false) {
             return response()->json(['errors' => 'The field url can not be equal application url'], 400);
-        }  
+        }
+
+        $parsedUrl = parse_url($url);
+
+        if(isset($parsedUrl['query'])) {
+            $queryParams = [];
+            parse_str($parsedUrl['query'], $queryParams);
+            
+            if(in_array("", $queryParams)) {
+                return response()->json(['errors' => 'The url query params can not be empty'], 400);
+            }
+        }
 
         $redirect = $this->redirectRepository->store($url);
 
