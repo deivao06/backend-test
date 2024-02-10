@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\RedirectFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,6 +15,11 @@ class Redirect extends Model
     protected $fillable = [
         'url',
     ];
+
+    public function redirectLogs()
+    {
+        return $this->hasMany(RedirectLog::class);
+    }
 
     protected function queryParams(): Attribute
     {
@@ -29,5 +35,10 @@ class Redirect extends Model
                 return $queryParams;
             }
         );
+    }
+
+    protected static function newFactory()
+    {
+        return RedirectFactory::new();
     }
 }

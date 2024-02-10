@@ -179,6 +179,7 @@ class RedirectController extends Controller
                         ->get();
 
         $last10DaysHits = RedirectLog::select(DB::raw("created_at as 'date', COUNT(*) as total, COUNT(DISTINCT(ip)) as 'unique'"))
+                            ->where('redirect_id', $redirect->id)
                             ->where('created_at', '>', Carbon::now()->subDay(10))
                             ->groupBy('created_at')
                             ->orderBy('created_at')
