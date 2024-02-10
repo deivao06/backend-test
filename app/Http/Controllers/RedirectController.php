@@ -63,9 +63,15 @@ class RedirectController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($code)
     {
-        //
+        $redirect = Redirect::where('code', $code)->first();
+
+        if(!$redirect) {
+            return response()->json([ 'errors' => 'Redirect does not exists' ]);
+        }
+
+        return new RedirectResource($redirect);
     }
 
     /**
@@ -135,8 +141,11 @@ class RedirectController extends Controller
             'query_params' => $request->query() ? json_encode($request->query()) : null
         ]);
 
+        $redirect->last_access = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
+        $redirect->save();
+
         $redirectQueryParams = $redirect->query_params;
-        
+
         $allQueryParams = http_build_query(array_merge($request->query(), $redirectQueryParams));
 
         $parsedUrl = parse_url($redirect->url);

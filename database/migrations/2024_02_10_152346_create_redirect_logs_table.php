@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('ip');
             $table->text('user_agent');
             $table->text('header_referer')->nullable();
-            $table->string('query_params')->nullabel();
+            $table->string('query_params')->nullable();
             $table->timestamps();
         });
     }
