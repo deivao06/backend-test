@@ -6,8 +6,12 @@ use App\Http\Requests\RedirectStoreRequest;
 use App\Http\Requests\RedirectUpdateRequest;
 use App\Http\Resources\RedirectResource;
 use App\Models\Redirect;
+use App\Models\RedirectLog;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Redirect as FacadesRedirect;
 use Vinkla\Hashids\Facades\Hashids;
+use Illuminate\Support\Facades\Redirect as LaravelRedirect;
+
 
 class RedirectController extends Controller
 {
@@ -113,5 +117,32 @@ class RedirectController extends Controller
         $redirect->delete();
 
         return response()->json([ 'message' => "Redirect $code deleted successfully" ], 200);
+    }
+
+    public function redirect(Request $request, $code)
+    {
+        $redirect = Redirect::where('code', $code)->first();
+
+        if(!$redirect) {
+            return response()->json([ 'errors' => 'Redirect does not exists' ]);
+        }
+
+        RedirectLog::create([
+            'redirect_id' => $redirect->id,
+            'ip' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'header_referer' => $request->server('HTTP_REFERER'),
+            'query_params' => $request->query() ? json_encode($request->query()) : null
+        ]);
+
+        $redirectQueryParams = $redirect->query_params;
+        
+        $allQueryParams = http_build_query(array_merge($request->query(), $redirectQueryParams));
+
+        $parsedUrl = parse_url($redirect->url);
+
+        $finalUrlToRedirect = "{$parsedUrl['scheme']}://{$parsedUrl['host']}?$allQueryParams";
+
+        return LaravelRedirect::to($finalUrlToRedirect);
     }
 }
