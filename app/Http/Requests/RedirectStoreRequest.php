@@ -33,6 +33,6 @@ class RedirectStoreRequest extends FormRequest
     {
         throw new HttpResponseException(response()->json([
             'errors' => $validator->errors()
-        ], 422));
+        ], 400));
     }
 }
