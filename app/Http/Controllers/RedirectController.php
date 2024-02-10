@@ -68,7 +68,7 @@ class RedirectController extends Controller
         $redirect = Redirect::where('code', $code)->first();
 
         if(!$redirect) {
-            return response()->json([ 'errors' => 'Redirect does not exists' ]);
+            return response()->json([ 'errors' => 'Redirect does not exists' ], 400);
         }
 
         return new RedirectResource($redirect);
@@ -130,11 +130,11 @@ class RedirectController extends Controller
         $redirect = Redirect::where('code', $code)->first();
 
         if(!$redirect) {
-            return response()->json([ 'errors' => 'Redirect does not exists' ]);
+            return response()->json([ 'errors' => 'Redirect does not exists' ], 400);
         }
 
         if(!$redirect->status) {
-            return response()->json([ 'errors' => 'Redirect is not active' ]);
+            return response()->json([ 'errors' => 'Redirect is not active' ], 400);
         }
 
         RedirectLog::create([
@@ -164,7 +164,7 @@ class RedirectController extends Controller
         $redirect = Redirect::where('code', $code)->first();
 
         if(!$redirect) {
-            return response()->json([ 'errors' => 'Redirect does not exists' ]);
+            return response()->json([ 'errors' => 'Redirect does not exists' ], 400);
         }
 
         $totalHits = RedirectLog::where('redirect_id', $redirect->id)->count();
@@ -191,6 +191,6 @@ class RedirectController extends Controller
             'total_unique' => $uniqueHits,
             'top_referrers' => $topReferers,
             'last_10_days' => $last10DaysHits
-        ]);
+        ], 200);
     }
 }
