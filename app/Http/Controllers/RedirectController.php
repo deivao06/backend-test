@@ -133,6 +133,10 @@ class RedirectController extends Controller
             return response()->json([ 'errors' => 'Redirect does not exists' ]);
         }
 
+        if(!$redirect->status) {
+            return response()->json([ 'errors' => 'Redirect is not active' ]);
+        }
+
         RedirectLog::create([
             'redirect_id' => $redirect->id,
             'ip' => $request->ip(),
