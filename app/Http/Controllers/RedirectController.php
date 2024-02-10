@@ -7,11 +7,11 @@ use App\Http\Requests\RedirectUpdateRequest;
 use App\Http\Resources\RedirectResource;
 use App\Models\Redirect;
 use App\Models\RedirectLog;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Redirect as FacadesRedirect;
 use Vinkla\Hashids\Facades\Hashids;
 use Illuminate\Support\Facades\Redirect as LaravelRedirect;
-
+use Illuminate\Support\Facades\DB;
 
 class RedirectController extends Controller
 {
@@ -157,5 +157,39 @@ class RedirectController extends Controller
         $finalUrlToRedirect = "{$parsedUrl['scheme']}://{$parsedUrl['host']}?$allQueryParams";
 
         return LaravelRedirect::to($finalUrlToRedirect);
+    }
+
+    public function stats($code)
+    {
+        $redirect = Redirect::where('code', $code)->first();
+
+        if(!$redirect) {
+            return response()->json([ 'errors' => 'Redirect does not exists' ]);
+        }
+
+        $totalHits = RedirectLog::where('redirect_id', $redirect->id)->count();
+
+        $uniqueHits = RedirectLog::where('redirect_id', $redirect->id)->distinct('ip')->count();
+
+        $topReferers = RedirectLog::select(DB::raw('header_referer, COUNT(*) as count'))
+                        ->where('redirect_id', $redirect->id)
+                        ->groupBy('header_referer')
+                        ->orderByRaw('COUNT(*) DESC')
+                        ->limit(3)
+                        ->get();
+
+        $last10DaysHits = RedirectLog::select(DB::raw("created_at as 'date', COUNT(*) as total, COUNT(DISTINCT(ip)) as 'unique'"))
+                            ->where('created_at', '>', Carbon::now()->subDay(10))
+                            ->groupBy('created_at')
+                            ->orderBy('created_at')
+                            ->get();
+
+
+        return response()->json([
+            'total_accesses' => $totalHits,
+            'total_unique' => $uniqueHits,
+            'top_referrers' => $topReferers,
+            'last_10_days' => $last10DaysHits
+        ]);
     }
 }

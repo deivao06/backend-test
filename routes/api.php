@@ -16,3 +16,4 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::resource('redirects', RedirectController::class);
+Route::get('redirects/{redirect}/stats', [RedirectController::class, 'stats']);
