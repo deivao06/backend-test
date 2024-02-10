@@ -164,9 +164,7 @@ class RedirectController extends Controller
         $redirect->last_access = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
         $redirect->save();
 
-        $redirectQueryParams = $redirect->query_params;
-
-        $allQueryParams = http_build_query(array_merge($request->query(), $redirectQueryParams));
+        $allQueryParams = http_build_query(array_merge($redirect->query_params, $request->query()));
 
         $parsedUrl = parse_url($redirect->url);
 
