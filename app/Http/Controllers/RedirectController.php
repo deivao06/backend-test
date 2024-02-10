@@ -165,7 +165,7 @@ class RedirectController extends Controller
         $redirect->save();
 
         $redirectQueryParams = $redirect->query_params;
-
+        dd(array_merge($request->query(), $redirectQueryParams));
         $allQueryParams = http_build_query(array_merge($request->query(), $redirectQueryParams));
 
         $parsedUrl = parse_url($redirect->url);

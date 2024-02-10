@@ -19,8 +19,8 @@ class RedirectLogFactory extends Factory
         return [
             'ip' => fake()->ipv4(),
             'user_agent' => fake()->userAgent(),
-            'header_referer' => fake()->name(),
-            'query_params' => null
+            'header_referer' => fake()->url(),
+            'query_params' => json_encode(['teste' => 123, 'parameter' => 'qwert']),
         ];
     }
 }
